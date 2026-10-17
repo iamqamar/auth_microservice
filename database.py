@@ -1,13 +1,8 @@
-import os
-
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
-load_dotenv()
-
 engine = create_engine(
-    url=os.environ["DATABASE_URL"],
+    url="sqlite:///./userdb.db",
     connect_args={"check_same_thread": False}
 )
 
