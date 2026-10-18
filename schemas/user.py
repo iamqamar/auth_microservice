@@ -14,14 +14,14 @@ class UserIn(BaseModel):
             raise ValueError("Name cannot be empty or whitespace")
         if not value.replace(" ", "").isalpha():
             raise ValueError("Name must contain only alphabetic characters and spaces")
-        return value
+        return value.strip()
 
     @field_validator("email", mode="before")
     @classmethod
     def validate_email(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("Email cannot be empty or whitespace")
-        return value
+        return value.strip().lower()
 
     @field_validator("raw_password", mode="before")
     @classmethod
@@ -64,14 +64,14 @@ class UserUpdate(BaseModel):
             raise ValueError("Name cannot be empty or whitespace")
         if not value.replace(" ", "").isalpha():
             raise ValueError("Name must contain only alphabetic characters and spaces")
-        return value
+        return value.strip()
 
     @field_validator("email", mode="before")
     @classmethod
     def validate_email(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("Email cannot be empty or whitespace")
-        return value
+        return value.strip().lower()
 
 class PasswordUpdate:
     old_password: str = Field(min_length=8, max_length=50)
