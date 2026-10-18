@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
@@ -13,6 +14,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
+token_blocklist: set[str] = set()
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def hash_password(raw_password: str) -> str:
@@ -24,6 +27,7 @@ def verify_password(password: str, hash_password: str) -> bool:
 def create_access_token(user_id: int) -> str:
     payload = {
         "sub": str(user_id),
+        "jti": str(uuid.uuid4()),
         "exp": datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         "type": "access"
     }
@@ -48,7 +52,7 @@ def decode_token(token: str) -> dict:
         raise ValueError("Invalid or Expired token")
 
 
-def get_cuurent(
+def get_current_user(
     token: str = Depends(oauth2_scheme),
     session: Session = Depends(get_session)
 ) -> User:
@@ -66,6 +70,9 @@ def get_cuurent(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not an access token"
         )
+
+    if payload.get("jti") in token_blocklist:
+        raise HTTPException(status_code=401, detail="Token has been revoked")
 
     user = session.get(User, int(payload["sub"]))
 
