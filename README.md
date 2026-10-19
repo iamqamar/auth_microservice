@@ -7,7 +7,7 @@ A small REST API for user registration, JWT-based authentication, profile manage
 - Account registration with email and password validation
 - Password hashing with bcrypt
 - Access and refresh JWTs
-- Authenticated profile retrieval, update, and deactivation
+- Authenticated profile retrieval, update, password change, and deactivation
 - Administrator-only user listing, lookup, role toggling, and deletion
 - Database schema versioning through Alembic
 - Interactive OpenAPI documentation from FastAPI
@@ -183,6 +183,7 @@ curl -i -X POST http://127.0.0.1:8000/auth/logout \
 | --- | --- | --- | --- |
 | `GET` | `/users/me` | Bearer access token | Retrieve the current user's public profile. |
 | `PATCH` | `/users/me` | Bearer access token | Update the current user's name and/or email. |
+| `PATCH` | `/users/password` | Bearer access token | Set a new password. Returns `202`. |
 | `DELETE` | `/users/me` | Bearer access token | Deactivate the current user's account. Returns `204`. |
 
 ```bash
@@ -193,6 +194,11 @@ curl -X PATCH http://127.0.0.1:8000/users/me \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d '{"name":"Ada Byron"}'
+
+curl -X PATCH http://127.0.0.1:8000/users/password \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -d '{"new_password":"NewSecurePass1@"}'
 ```
 
 An inactive account cannot use protected endpoints; it returns `403`.
@@ -226,7 +232,7 @@ Registration requires:
 - `email`: a valid email address; it is trimmed and lowercased
 - `raw_password`: 8–50 characters, no spaces, and at least one uppercase letter, lowercase letter, digit, and one of `@`, `#`, or `.`
 
-Updating `/users/me` accepts optional `name` and `email` fields and applies the same name and email validation. Password changes are not exposed by the current API.
+Updating `/users/me` accepts optional `name` and `email` fields and applies the same name and email validation. `PATCH /users/password` accepts only `new_password` and applies the same password rules as registration.
 
 ## Response and error behavior
 
