@@ -20,6 +20,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
 
-    role: Mapped[str] = mapped_column(Enum(UserRole), nullable=False, default="user")
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False, default=UserRole.user)
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=func.now())
