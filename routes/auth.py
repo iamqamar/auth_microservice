@@ -98,5 +98,12 @@ def token_refresh(
 def logout(
     token: str = Depends(oauth2_scheme)
 ):
-    payload = decode_token(token)
+    try:
+        payload = decode_token(token)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not a valid token"
+        )
+
     token_blocklist.add(payload["jti"])
