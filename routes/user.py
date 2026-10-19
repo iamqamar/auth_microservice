@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
-from core.setting import get_current_user, require_admin
+from core.setting import get_current_user, hash_password, require_admin
 from database import Session, get_session
 from models.user import User, UserRole
-from schemas.user import UserOut, UserOutAdmin, UserUpdate
+from schemas.user import PasswordUpdate, UserOut, UserOutAdmin, UserUpdate
 
 router = APIRouter(prefix="/users")
 
@@ -31,6 +31,16 @@ def update_user(
     session.refresh(current_user)
 
     return current_user
+
+@router.patch("/password", status_code=status.HTTP_202_ACCEPTED, tags=["user"])
+def update_password(
+    passwd: PasswordUpdate,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    current_user.hashed_password = hash_password(passwd.new_password)
+
+    session.commit()
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, tags=["user"])
 def deactive_user(
