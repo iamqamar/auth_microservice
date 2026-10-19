@@ -13,7 +13,7 @@ from core.setting import (
 )
 from database import Session, get_session
 from models.user import User
-from schemas.auth import TokenOut
+from schemas.auth import RefreshIn, TokenOut
 from schemas.user import UserIn, UserOutAdmin
 
 router = APIRouter(
@@ -47,7 +47,7 @@ def register(user: UserIn, session: Session = Depends(get_session)):
 
     if exist:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already exist"
         )
 
@@ -64,11 +64,11 @@ def register(user: UserIn, session: Session = Depends(get_session)):
 
 @router.post("/refresh", response_model=TokenOut)
 def token_refresh(
-    refresh_token: str,
+    data: RefreshIn,
     session: Session = Depends(get_session)
 ):
     try:
-        payload = decode_token(token=refresh_token)
+        payload = decode_token(token=data.refresh_token)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,7 +91,7 @@ def token_refresh(
 
     return TokenOut(
         access_token=create_access_token(user.id),
-        refresh_token=refresh_token
+        refresh_token=data.refresh_token
     )
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
