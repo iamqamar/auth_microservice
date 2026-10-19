@@ -77,11 +77,10 @@ class UserUpdate(BaseModel):
             raise ValueError("Email cannot be empty or whitespace")
         return value.strip().lower()
 
-class PasswordUpdate:
-    old_password: str = Field(min_length=8, max_length=50)
+class PasswordUpdate(BaseModel):
     new_password: str = Field(min_length=8, max_length=50)
 
-    @field_validator("old_password", "new_password", mode="before")
+    @field_validator("new_password", mode="before")
     @classmethod
     def validate_password(cls, value: str) -> str:
         if not value.strip():
