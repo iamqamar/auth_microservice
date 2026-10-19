@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from database import Session, get_session
-from models.user import User
+from models.user import User, UserRole
 
 SECRET_KEY = "TEST_KEY"
 ALGORITHM = "HS256"
@@ -78,8 +78,23 @@ def get_current_user(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No user found"
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active"
+        )
+
     return user
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in (UserRole.admin, UserRole.admin.value):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized"
+        )
+
+    return current_user
