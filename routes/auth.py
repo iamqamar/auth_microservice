@@ -6,7 +6,6 @@ from core.setting import (
     create_access_token,
     create_refresh_token,
     decode_token,
-    get_current_user,
     hash_password,
     oauth2_scheme,
     token_blocklist,
@@ -97,8 +96,7 @@ def token_refresh(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
-    token: str = Depends(oauth2_scheme),
-    current_user = Depends(get_current_user)
+    token: str = Depends(oauth2_scheme)
 ):
     payload = decode_token(token)
     token_blocklist.add(payload["jti"])
