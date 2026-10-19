@@ -59,7 +59,9 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = Field(default=None)
 
     @field_validator("name", mode="before")
-    def validate_name(cls, value: str) -> str:
+    def validate_name(cls, value: str | None) -> str | None:
+        if not value:
+            return None
         if not value.strip():
             raise ValueError("Name cannot be empty or whitespace")
         if not value.replace(" ", "").isalpha():
@@ -68,7 +70,9 @@ class UserUpdate(BaseModel):
 
     @field_validator("email", mode="before")
     @classmethod
-    def validate_email(cls, value: str) -> str:
+    def validate_email(cls, value: str | None) -> str | None:
+        if not value:
+            return None
         if not value.strip():
             raise ValueError("Email cannot be empty or whitespace")
         return value.strip().lower()
